@@ -115,12 +115,12 @@ public class myTotalCostCalcTest {
         greenApples.setName("Green Apples");
         greenApples.setUnitPrice(1.0);
         greenApples.setQuantity(20);
-        PurchaseItem redApples = new PurchaseItem(greenApples.getName(),
+        PurchaseItem greenApplesSmall = new PurchaseItem(greenApples.getName() + " Small",
                 greenApples.getUnitPrice() + 3, greenApples.getQuantity());
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.STANDARD;
         cart.addItem(greenApples);
-        cart.addItem(redApples);
+        cart.addItem(greenApplesSmall);
         Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
         Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "AZ", shipping);
         assert(bill.getTotal() == calcTotal);
