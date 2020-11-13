@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 
 @Data
 @Entity
+public
 /**
  * A class that represents a purchased item.  Notice however that it
  * contains a quantity value, therefore the total value of this item is
@@ -48,9 +49,9 @@ class PurchaseItem {
   private Double unitPrice;
   private Integer quantity;
 
-  private PurchaseItem() {}
+  public PurchaseItem() {}
 
-  PurchaseItem(String name, double unitPrice, int quantity) {
+  public PurchaseItem(String name, double unitPrice, int quantity) {
     this.name = name;
     this.unitPrice = unitPrice;
     this.quantity = quantity;

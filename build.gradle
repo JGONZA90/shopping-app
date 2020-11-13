@@ -1,8 +1,11 @@
 plugins {
     id 'java'
+    id 'java-library'
     id "io.freefair.lombok" version "5.1.0"
     id 'org.springframework.boot' version '2.3.3.RELEASE'
+    id 'jacoco'
 }
+
 
 repositories {
     mavenLocal()
@@ -10,6 +13,8 @@ repositories {
 }
 
 dependencies {
+    def cucumberVersion = '6.6.1'
+    def junitVersion = '5.6.2'
     implementation 'org.springframework.boot:spring-boot-starter-web:2.3.0.RELEASE'
     implementation 'javax.persistence:javax.persistence-api:2.2'
     implementation 'org.projectlombok:lombok:1.18.12'
@@ -22,27 +27,37 @@ dependencies {
 //    testImplementation 'org.assertj:assertj-core:3.16.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.6.1'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation "io.cucumber:cucumber-java:$cucumberVersion"
+    testImplementation "io.cucumber:cucumber-junit:$cucumberVersion"
 }
+
+task cukesTest(type: Test){
+    include "shoppingapp/testRunner"
+}
+
 
 group = 'edu.depail.se433'
 version = '0.0.1-SNAPSHOT'
 description = 'shopping-app'
 sourceCompatibility = '11'
 
-def user = 'dwalke30'
+def user = 'JGONZA90'
 
 bootJar {
     mainClassName = 'edu.depaul.se433.shoppingapp.ShoppingAppApplication'
 }
 
 def test = tasks.named("test") {
-
     useJUnitPlatform ()
-
+    finalizedBy cukesTest
+    finalizedBy jacocoTestReport
     afterTest { desc, result ->
         logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
     }
 }
+
 
 task packageDistribution(type: Zip) {
     dependsOn test
@@ -55,13 +70,33 @@ task packageDistribution(type: Zip) {
         include "gradlew"
         include "gradlew.bat"
         include "settings.gradle"
+        include 'build/reports/**/*'
     }
 
     into("${user}-${rootProject.name}")
 }
 
+jacocoTestReport {
+    dependsOn test
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8
+            }
+        }
+    }
+}
+
 check {
-    finalizedBy packageDistribution
+    dependsOn {
+        jacocoTestCoverageVerification
+    }
+    finalizedBy {
+        packageDistribution
+    }
 }
 
 
