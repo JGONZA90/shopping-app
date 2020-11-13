@@ -91,8 +91,8 @@ public class myTotalCostCalcTest {
     void strongNormal2(){
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.STANDARD;
-        Bill bill = TotalCostCalculator.calculate(cart, "IL", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "IL", shipping);
+        Bill bill = TotalCostCalculator.calculate(cart, "CA", shipping);
+        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "CA", shipping);
         assert(bill.getTotal() == calcTotal);
     }
 
@@ -103,8 +103,8 @@ public class myTotalCostCalcTest {
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.NEXT_DAY;
         cart.addItem(item);
-        Bill bill = TotalCostCalculator.calculate(cart, "IL", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "IL", shipping);
+        Bill bill = TotalCostCalculator.calculate(cart, "NY", shipping);
+        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "NY", shipping);
         assert(bill.getTotal() == calcTotal);
     }
 
