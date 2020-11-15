@@ -11,9 +11,9 @@ import java.util.Random;
 
 public class totalCostCalcSteps {
 
-    private int cartTotal = 0;
-    private String taxState = "";
-    private ShippingType shipping;
+    private transient int cartTotal = 0;
+    private transient String taxState = "";
+    private transient ShippingType shipping;
 
     @Given("Customer has {int} dollars worth of items in Cart")
     public void customer_has_dollars_worth_of_items_in_cart(Integer int1) {

@@ -29,7 +29,7 @@ public class TotalCostCalculator {
     return initialCost + tax + shippingCost;
   }
 
-  private static double getShippingCost(ShippingType shipping, double initialCost) {
+  public static double getShippingCost(ShippingType shipping, double initialCost) {
     if (initialCost > 50.0) {
       return 0.0;
     } else {

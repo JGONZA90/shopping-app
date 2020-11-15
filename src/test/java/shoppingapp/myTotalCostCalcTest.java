@@ -9,24 +9,29 @@ import org.mockito.Mock;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class myTotalCostCalcTest {
+    final static transient String apples = "Apples";
+    final static transient String custS = "Bob";
+    final static transient String shipSS = "STANDARD";
+    final static transient String dEqString = "Double Equality w/Delta";
 
     @Test
     @DisplayName("weakNormalOne")
     void weakNormal1(){
-        PurchaseItem item = new PurchaseItem("Apples", 1, 20);
+        PurchaseItem item = new PurchaseItem(apples, 1, 20);
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.STANDARD;
         cart.addItem(item);
-        Bill bill = TotalCostCalculator.calculate(cart, "IL", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "IL", shipping);
-        assert(bill.total() == calcTotal);
+        double tax = TaxCalculator.calculate(cart.cost(), "IL");
+        double shipCost = TotalCostCalculator.getShippingCost(shipping, cart.cost());
+        double calcTotal = TotalCostCalculator.calculate(cart.cost(), "IL", shipping);
+        Bill bill = new Bill(cart.cost(), shipCost, tax, calcTotal);
+        assertEquals(bill.total(), calcTotal, 0.00001, dEqString);
     }
 
     @Test
@@ -34,9 +39,11 @@ public class myTotalCostCalcTest {
     void weakNormal2(){
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.NEXT_DAY;
-        Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "AZ", shipping);
-        assert(bill.total() == calcTotal);
+        double tax = TaxCalculator.calculate(cart.cost(), "AZ");
+        double shipCost = TotalCostCalculator.getShippingCost(shipping, cart.cost());
+        double calcTotal = TotalCostCalculator.calculate(cart.cost(), "AZ", shipping);
+        Bill bill = new Bill(cart.cost(), shipCost, tax, calcTotal);
+        assertEquals(bill.total(), calcTotal, 0.00001, dEqString);
     }
 
     @Test
@@ -45,45 +52,47 @@ public class myTotalCostCalcTest {
         ShoppingCart cart = null;
         ShippingType shipping = ShippingType.STANDARD;
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, "IL", shipping);
+            TotalCostCalculator.calculate(cart, "IL", shipping);
         });
     }
 
     @Test
     @DisplayName("weakRobustTwo")
     void weakRobust2(){
-        PurchaseItem item = new PurchaseItem("Apples", 1, 20);
+        PurchaseItem item = new PurchaseItem(apples, 1, 20);
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.STANDARD;
         String state = null;
         cart.addItem(item);
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, state, shipping);
+            TotalCostCalculator.calculate(cart, state, shipping);
         });
     }
 
     @Test
     @DisplayName("weakRobustThree")
     void weakRobust3(){
-        PurchaseItem item = new PurchaseItem("Apples", 1, 20);
+        PurchaseItem item = new PurchaseItem(apples, 1, 20);
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = null;
         cart.addItem(item);
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, "IL", shipping);
+            TotalCostCalculator.calculate(cart, "IL", shipping);
         });
     }
 
     @Test
     @DisplayName("strongNormalOne")
     void strongNormal1(){
-        PurchaseItem item = new PurchaseItem("Apples", 1, 20);
+        PurchaseItem item = new PurchaseItem(apples, 1, 20);
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.NEXT_DAY;
         cart.addItem(item);
-        Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "AZ", shipping);
-        assert(bill.getTotal() == calcTotal);
+        double tax = TaxCalculator.calculate(cart.cost(), "AZ");
+        double shipCost = TotalCostCalculator.getShippingCost(shipping, cart.cost());
+        double calcTotal = TotalCostCalculator.calculate(cart.cost(), "AZ", shipping);
+        Bill bill = new Bill(cart.cost(), shipCost, tax, calcTotal);
+        assertEquals(bill.total(), calcTotal, 0.00001, dEqString);
     }
 
     @Test
@@ -91,21 +100,25 @@ public class myTotalCostCalcTest {
     void strongNormal2(){
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.STANDARD;
-        Bill bill = TotalCostCalculator.calculate(cart, "CA", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "CA", shipping);
-        assert(bill.getTotal() == calcTotal);
+        double tax = TaxCalculator.calculate(cart.cost(), "CA");
+        double shipCost = TotalCostCalculator.getShippingCost(shipping, cart.cost());
+        double calcTotal = TotalCostCalculator.calculate(cart.cost(), "CA", shipping);
+        Bill bill = new Bill(cart.cost(), shipCost, tax, calcTotal);
+        assertEquals(bill.total(), calcTotal, 0.00001, dEqString);
     }
 
     @Test
     @DisplayName("strongRobustOne")
     void strongRobust1(){
-        PurchaseItem item = new PurchaseItem("Apples", 1, 20);
+        PurchaseItem item = new PurchaseItem(apples, 1, 20);
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.NEXT_DAY;
         cart.addItem(item);
-        Bill bill = TotalCostCalculator.calculate(cart, "NY", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "NY", shipping);
-        assert(bill.getTotal() == calcTotal);
+        double tax = TaxCalculator.calculate(cart.cost(), "NY");
+        double shipCost = TotalCostCalculator.getShippingCost(shipping, cart.cost());
+        double calcTotal = TotalCostCalculator.calculate(cart.cost(), "NY", shipping);
+        Bill bill = new Bill(cart.cost(), shipCost, tax, calcTotal);
+        assertEquals(bill.total(), calcTotal, 0.00001, dEqString);
     }
 
     @Test
@@ -121,9 +134,11 @@ public class myTotalCostCalcTest {
         ShippingType shipping = ShippingType.STANDARD;
         cart.addItem(greenApples);
         cart.addItem(greenApplesSmall);
-        Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "AZ", shipping);
-        assert(bill.getTotal() == calcTotal);
+        double tax = TaxCalculator.calculate(cart.cost(), "AZ");
+        double shipCost = TotalCostCalculator.getShippingCost(shipping, cart.cost());
+        double calcTotal = TotalCostCalculator.calculate(cart.cost(), "AZ", shipping);
+        Bill bill = new Bill(cart.cost(), shipCost, tax, calcTotal);
+        assertEquals(bill.total(), calcTotal, 0.00001, dEqString);
     }
 
     @Test
@@ -131,9 +146,11 @@ public class myTotalCostCalcTest {
     void strongRobust3(){
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.NEXT_DAY;
-        Bill bill = TotalCostCalculator.calculate(cart, "IL", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "IL", shipping);
-        assert(bill.getTotal() == calcTotal);
+        double tax = TaxCalculator.calculate(cart.cost(), "IL");
+        double shipCost = TotalCostCalculator.getShippingCost(shipping, cart.cost());
+        double calcTotal = TotalCostCalculator.calculate(cart.cost(), "IL", shipping);
+        Bill bill = new Bill(cart.cost(), shipCost, tax, calcTotal);
+        assertEquals(bill.total(), calcTotal, 0.00001, dEqString);
     }
 
     @Test
@@ -141,9 +158,11 @@ public class myTotalCostCalcTest {
     void strongRobust4(){
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.STANDARD;
-        Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
-        Double calcTotal = TotalCostCalculator.calculate(bill.getInitialCost(), "AZ", shipping);
-        assert(bill.getTotal() == calcTotal);
+        double tax = TaxCalculator.calculate(cart.cost(), "AZ");
+        double shipCost = TotalCostCalculator.getShippingCost(shipping, cart.cost());
+        double calcTotal = TotalCostCalculator.calculate(cart.cost(), "AZ", shipping);
+        Bill bill = new Bill(cart.cost(), shipCost, tax, calcTotal);
+        assertEquals(bill.total(), calcTotal, 0.00001, dEqString);
     }
 
     @Test
@@ -152,7 +171,7 @@ public class myTotalCostCalcTest {
         ShoppingCart cart = null;
         ShippingType shipping = ShippingType.NEXT_DAY;
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, "IL", shipping);
+            TotalCostCalculator.calculate(cart, "IL", shipping);
         });
     }
 
@@ -162,7 +181,7 @@ public class myTotalCostCalcTest {
         ShoppingCart cart = null;
         ShippingType shipping = ShippingType.STANDARD;
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
+            TotalCostCalculator.calculate(cart, "AZ", shipping);
         });
     }
 
@@ -172,20 +191,20 @@ public class myTotalCostCalcTest {
         ShoppingCart cart = null;
         ShippingType shipping = ShippingType.NEXT_DAY;
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
+            TotalCostCalculator.calculate(cart, "AZ", shipping);
         });
     }
 
     @Test
     @DisplayName("strongRobustEight")
     void strongRobust8(){
-        PurchaseItem item = new PurchaseItem("Apples", 1, 20);
+        PurchaseItem item = new PurchaseItem(apples, 1, 20);
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.NEXT_DAY;
         String state = null;
         cart.addItem(item);
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, state, shipping);
+            TotalCostCalculator.calculate(cart, state, shipping);
         });
     }
 
@@ -196,7 +215,7 @@ public class myTotalCostCalcTest {
         ShippingType shipping = ShippingType.STANDARD;
         String state = null;
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, state, shipping);
+            TotalCostCalculator.calculate(cart, state, shipping);
         });
     }
 
@@ -207,19 +226,19 @@ public class myTotalCostCalcTest {
         ShippingType shipping = ShippingType.NEXT_DAY;
         String state = null;
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, state, shipping);
+            TotalCostCalculator.calculate(cart, state, shipping);
         });
     }
 
     @Test
     @DisplayName("strongRobustEleven")
     void strongRobust11(){
-        PurchaseItem item = new PurchaseItem("Apples", 1, 20);
+        PurchaseItem item = new PurchaseItem(apples, 1, 20);
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = null;
         cart.addItem(item);
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
+            TotalCostCalculator.calculate(cart, "AZ", shipping);
         });
     }
 
@@ -229,7 +248,7 @@ public class myTotalCostCalcTest {
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = null;
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, "IL", shipping);
+            TotalCostCalculator.calculate(cart, "IL", shipping);
         });
     }
 
@@ -239,7 +258,7 @@ public class myTotalCostCalcTest {
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = null;
         assertThrows(NullPointerException.class, ()->{
-            Bill bill = TotalCostCalculator.calculate(cart, "AZ", shipping);
+            TotalCostCalculator.calculate(cart, "AZ", shipping);
         });
     }
 
@@ -248,7 +267,7 @@ public class myTotalCostCalcTest {
     void cartClearCount(){
         ShoppingCart cart = new ShoppingCart();
         cart.clear();
-        assert(cart.itemCount() == 0);
+        assertEquals(0, cart.itemCount(), "Expecting Zero");
     }
 
     @Test
@@ -256,7 +275,7 @@ public class myTotalCostCalcTest {
     void cartCost(){
         ShoppingCart cart = new ShoppingCart();
         cart.clear();
-        assert(cart.cost() == 0);
+        assertEquals(0, cart.cost(), "Expecting Zero");
     }
 
 
@@ -267,23 +286,23 @@ public class myTotalCostCalcTest {
         ShoppingCart cart = new ShoppingCart();
         ShippingType shipping = ShippingType.STANDARD;
         Bill x = TotalCostCalculator.calculate(cart, "IL", shipping);
-        assert(x.equals(new Bill(0, 10, .6, 10.60)));
+        assertEquals(new Bill(0, 10, .6, 10.60), x, "Equality");
     }
 
     @Test
     @DisplayName("Computes cost for large purchase w/free shipping & no tax")
     void totalCostOver50(){
         ShippingType shipping = ShippingType.NEXT_DAY;
-        Double x = TotalCostCalculator.calculate(125, "WA", shipping);
-        assert(x == 125);
+        double x = TotalCostCalculator.calculate(125, "WA", shipping);
+        assertEquals(125, x, 0.00001, dEqString);
     }
 
     @ParameterizedTest
     @DisplayName("Tests that tax states return proper rate and total")
     @ValueSource(strings = {"CA", "IL", "NY"})
     void stateTax(String state){
-        Double x =  TaxCalculator.calculate(25, state);
-        assert(x == 1.5);
+        double x =  TaxCalculator.calculate(25, state);
+        assertEquals(1.5, x, 0.00001, dEqString);
     }
 
     @Test
@@ -294,20 +313,26 @@ public class myTotalCostCalcTest {
 
         Purchase xP = new Purchase();
         xP.setCost(25);
-        xP.setCustomerName("Bob");
+        xP.setCustomerName(custS);
         xP.setIdNum(12314);
         xP.setPurchaseDate(LocalDate.now());
-        xP.setShipping(ShippingType.STANDARD.name());
+        xP.setShipping(shipSS);
         xP.setState("IL");
 
-        Purchase yP = Purchase.make(xP.getCustomerName(), xP.getPurchaseDate(),
-                xP.getCost(), xP.getState(), xP.getShipping());
+        Purchase yP = new Purchase();
+        yP.setCost(xP.getCost());
+        yP.setCustomerName(xP.getCustomerName());
+        yP.setIdNum(98765);
+        yP.setPurchaseDate(xP.getPurchaseDate());
+        yP.setShipping(xP.getShipping());
+        yP.setState(xP.getState());
+
         testAgent.save(xP);
         testAgent.save(yP);
 
         double avgP = testAgent.averagePurchase();
         double avgGetCost = (xP.getCost() + yP.getCost()) / 2;
-        assertEquals(avgP, avgGetCost, 0.00001);
+        assertEquals(avgP, avgGetCost, 0.00001, dEqString);
     }
 
     @Test
@@ -318,17 +343,23 @@ public class myTotalCostCalcTest {
 
         Purchase xP = new Purchase();
         xP.setCost(25);
-        xP.setCustomerName("Bob");
+        xP.setCustomerName(custS);
         xP.setIdNum(12314);
         xP.setPurchaseDate(LocalDate.now());
-        xP.setShipping(ShippingType.STANDARD.name());
+        xP.setShipping(shipSS);
         xP.setState("IL");
 
-        Purchase yP = Purchase.make(xP.getCustomerName(), xP.getPurchaseDate(),
-                xP.getCost(), xP.getState(), xP.getShipping());
+        Purchase yP = new Purchase();
+        yP.setCost(xP.getCost());
+        yP.setCustomerName(xP.getCustomerName());
+        yP.setIdNum(98765);
+        yP.setPurchaseDate(xP.getPurchaseDate());
+        yP.setShipping(xP.getShipping());
+        yP.setState(xP.getState());
+
         testAgent.save(xP);
         testAgent.save(yP);
-        assert(xP.toString().equals(yP.toString()));
+        assertEquals(xP.toString(), yP.toString(), "Purchase toString Equality");
     }
 
     @Test
@@ -339,21 +370,26 @@ public class myTotalCostCalcTest {
 
         Purchase xP = new Purchase();
         xP.setCost(25);
-        xP.setCustomerName("Bob");
+        xP.setCustomerName(custS);
         xP.setIdNum(12314);
         xP.setPurchaseDate(LocalDate.now());
-        xP.setShipping(ShippingType.STANDARD.name());
+        xP.setShipping(shipSS);
         xP.setState("IL");
 
-        Purchase yP = Purchase.make(xP.getCustomerName(), xP.getPurchaseDate(),
-                xP.getCost(), xP.getState(), xP.getShipping());
+        Purchase yP = new Purchase();
+        yP.setCost(xP.getCost());
+        yP.setCustomerName(xP.getCustomerName());
         yP.setIdNum(12314);
+        yP.setPurchaseDate(xP.getPurchaseDate());
+        yP.setShipping(xP.getShipping());
+        yP.setState(xP.getState());
+
         testAgent.save(xP);
         testAgent.save(yP);
-        assert (xP.getIdNum() == yP.getIdNum());
+        assertEquals(xP.getIdNum(), yP.getIdNum(), "ID Equality");
     }
 
-    @Mock PurchaseDBO mockPDBO;
+    @Mock transient PurchaseDBO mockPDBO;
 
     @Test
     @DisplayName("Checks that testAgent.save() calls mock PurchaseDBO.save()")
@@ -362,13 +398,13 @@ public class myTotalCostCalcTest {
         PurchaseAgent testAgent = new PurchaseAgent(mockPDBO);
         Purchase xP = new Purchase();
         xP.setCost(25);
-        xP.setCustomerName("Bob");
+        xP.setCustomerName(custS);
         xP.setIdNum(12314);
         xP.setPurchaseDate(LocalDate.now());
-        xP.setShipping(ShippingType.STANDARD.name());
+        xP.setShipping(shipSS);
         xP.setState("IL");
         testAgent.save(xP);
-        verify(mockPDBO, times(1)).savePurchase(xP);
+        verify(mockPDBO).savePurchase(xP);
     }
 
     @Test
@@ -378,14 +414,14 @@ public class myTotalCostCalcTest {
         PurchaseAgent testAgent = new PurchaseAgent(mockPDBO);
         Purchase xP = new Purchase();
         xP.setCost(25);
-        xP.setCustomerName("Bob");
+        xP.setCustomerName(custS);
         xP.setIdNum(12314);
         xP.setPurchaseDate(LocalDate.now());
-        xP.setShipping(ShippingType.STANDARD.name());
+        xP.setShipping(shipSS);
         xP.setState("IL");
         testAgent.save(xP);
-        List<Purchase> purchaseList = testAgent.getPurchases();
-        verify(mockPDBO, times(1)).getPurchases();
+        testAgent.getPurchases();
+        verify(mockPDBO).getPurchases();
     }
 
     @Test
@@ -395,13 +431,13 @@ public class myTotalCostCalcTest {
         PurchaseAgent testAgent = new PurchaseAgent(mockPDBO);
         Purchase xP = new Purchase();
         xP.setCost(25);
-        xP.setCustomerName("Bob");
+        xP.setCustomerName(custS);
         xP.setIdNum(12314);
         xP.setPurchaseDate(LocalDate.now());
-        xP.setShipping(ShippingType.STANDARD.name());
+        xP.setShipping(shipSS);
         xP.setState("IL");
         testAgent.save(xP);
-        Double avgP = testAgent.averagePurchase();
-        verify(mockPDBO, times(1)).getPurchases();
+        testAgent.averagePurchase();
+        verify(mockPDBO).getPurchases();
     }
 }
